@@ -137,6 +137,7 @@ python3 test.py --dataroot datasets/IXI/T1_T2__PD/ --name T2_PD_T1_mambaoffTekra
 | `--which_epoch`     | Which epoch to load? Set to 'latest' to use the latest cached model.        |
 
 ## Citation
+You are encouraged to modify/distribute this code. However, please acknowledge this code and cite the paper appropriately.
 ```
 @article{atli2024i2imamba,
   title={I2I-Mamba: Multi-modal medical image synthesis via selective state space modeling}, 
@@ -145,6 +146,12 @@ python3 test.py --dataroot datasets/IXI/T1_T2__PD/ --name T2_PD_T1_mambaoffTekra
   journal={arXiv:2405.14022}
 }
 ```
+For any questions, comments and contributions, please contact Omer Faruk Atli (faruk.atli[at]bilkent.edu.tr)
+
+(c) ICON Lab 2024
+## Acknowledgments
+
+This code uses libraries from [ResViT](https://github.com/icon-lab/ResViT) and [mamba](https://github.com/state-spaces/mamba) repository.
 
 ## License
 Copyright © 2024, ICON Lab.
