@@ -146,7 +146,7 @@ You are encouraged to modify/distribute this code. However, please acknowledge t
   journal={arXiv:2405.14022}
 }
 ```
-For any questions, comments and contributions, please contact Omer Faruk Atli (faruk.atli[at]bilkent.edu.tr)
+For any questions, comments and contributions, please feel free to contact Omer Faruk Atli (faruk.atli[at]bilkent.edu.tr)
 
 ## Acknowledgments
 
