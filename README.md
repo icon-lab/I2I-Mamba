@@ -148,7 +148,6 @@ You are encouraged to modify/distribute this code. However, please acknowledge t
 ```
 For any questions, comments and contributions, please contact Omer Faruk Atli (faruk.atli[at]bilkent.edu.tr)
 
-(c) ICON Lab 2024
 ## Acknowledgments
 
 This code uses libraries from [ResViT](https://github.com/icon-lab/ResViT) and [mamba](https://github.com/state-spaces/mamba) repository.
