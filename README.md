@@ -152,5 +152,6 @@ For any questions, comments and contributions, please feel free to contact Omer 
 
 This code uses libraries from [ResViT](https://github.com/icon-lab/ResViT) and [mamba](https://github.com/state-spaces/mamba) repository.
 
-## License
+<hr>
+
 Copyright © 2024, ICON Lab.
