@@ -42,7 +42,7 @@ scipy
 ml_collections
 mamba-ssm==1.1.3
 ```
-
+You are welcomed to ask any library issues.
 
 ## Dataset
 To reproduce the results reported in the paper, we recommend the following dataset processing steps:
