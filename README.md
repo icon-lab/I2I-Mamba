@@ -58,6 +58,9 @@ You should structure your aligned dataset in the following way:
 /datasets/IXI/
   ├── T1_T2
   │   ├── train
+  |    - 1.png
+  |    - 2.png
+  |    - ...
   │   ├── val
   │   └── test
   ├── T2_PD
@@ -68,6 +71,9 @@ You should structure your aligned dataset in the following way:
   │   └── ...
   
 ```
+
+x.png is a single image containing both source and target image side-by-side. Thus resulting image for one-to-one task it will be 512 pixels horizontally and 256 pixels vertically and for many-to-one task it will be 768 pixels horizontally and 256 pixels vertically.
+
 Note that for many-to-one tasks, source modalities should be in the Red and Green channels.
 
 ## Training
