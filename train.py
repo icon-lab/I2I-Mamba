@@ -1,7 +1,6 @@
 import os
 import time
 import numpy as np
-from skimage.metrics import peak_signal_noise_ratio as psnr
 
 from models import create_model
 from data import CreateDataLoader
@@ -37,10 +36,8 @@ if __name__ == '__main__':
     
     if opt.model=='cycle_gan':
         L1_avg=np.zeros([2,opt.niter + opt.niter_decay,len(dataset_val)])      
-        psnr_avg=np.zeros([2,opt.niter + opt.niter_decay,len(dataset_val)])            
     else:
         L1_avg=np.zeros([opt.niter + opt.niter_decay,len(dataset_val)])      
-        psnr_avg=np.zeros([opt.niter + opt.niter_decay,len(dataset_val)])       
     
     model = create_model(opt)
     visualizer = Visualizer(opt)
@@ -124,13 +121,10 @@ if __name__ == '__main__':
                     continue
                 
                 L1_avg[epoch-1,i]=abs(fake_im-real_im).mean()
-                psnr_avg[epoch-1,i]=psnr(fake_im/fake_im.max(),real_im/real_im.max())
 
             l1_avg_loss = np.mean(L1_avg[epoch-1])
-            mean_psnr = np.mean(psnr_avg[epoch-1])
-            std_psnr = np.std(psnr_avg[epoch-1])
 
-            print_log(logger,'Epoch %3d   l1_avg_loss: %.5f   mean_psnr: %.3f  std_psnr:%.3f ' % (epoch, l1_avg_loss, mean_psnr,std_psnr))
+            print_log(logger,'Epoch %3d   l1_avg_loss: %.5f' % (epoch, l1_avg_loss))
             print_log(logger,'')
             logger.close()
             print('saving the model at the end of epoch %d, iters %d' %(epoch, total_steps))
