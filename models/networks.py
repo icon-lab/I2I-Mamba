@@ -304,7 +304,7 @@ def print_network(net):
 
 
 # Defines the GAN loss which uses either LSGAN or the regular GAN.
-# When LSGAN is used, it is basically same as MSELoss,
+# When LSGAN is used, it is basically the same as MSELoss,
 # but it abstracts away the need to create the target label tensor
 # that has the same size as the input
 class GANLoss(nn.Module):
