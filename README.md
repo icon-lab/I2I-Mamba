@@ -23,7 +23,7 @@
 Official PyTorch implementation of **I2I-Mamba**, a novel adversarial model for multi-modal medical image synthesis that leverages selective state space modeling (SSM) to efficiently capture long-range context while maintaining local precision. I2I-Mamba injects channel-mixed Mamba (cmMamba) blocks in the bottleneck of a convolutional backbone. In cmMamba blocks, SSM layers are used to learn context across the spatial dimension and channel-mixing layers are used to learn context across the channel dimension of feature maps.
 
 
-![arhitecture](figures/architecture.png)
+![architecture](figures/architecture.png)
 
 
 ## Dependencies
@@ -42,7 +42,7 @@ scipy
 ml_collections
 mamba-ssm==1.1.3
 ```
-You are welcomed to ask any library issues.
+You are welcome to ask any library issues.
 
 ## Dataset
 To reproduce the results reported in the paper, we recommend the following dataset processing steps:
@@ -72,7 +72,7 @@ You should structure your aligned dataset in the following way:
   
 ```
 
-x.png is a single image containing both source and target image side-by-side. Thus resulting image for one-to-one task it will be 512 pixels horizontally and 256 pixels vertically and for many-to-one task it will be 768 pixels horizontally and 256 pixels vertically.
+x.png is a single image containing both source and target image side-by-side. Thus the resulting image for one-to-one task will be 512 pixels horizontally and 256 pixels vertically and for many-to-one task it will be 768 pixels horizontally and 256 pixels vertically.
 
 Note that for many-to-one tasks, source modalities should be in the Red and Green channels.
 
