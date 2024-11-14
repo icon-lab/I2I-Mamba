@@ -407,7 +407,7 @@ class ChannelCompression(nn.Module):
         return out
     
 
-class MambaLayer(nn.Module):
+class MambaLayerOnlyspiral(nn.Module):
     """ Mamba layer for state-space sequence modeling
 
     Args:
@@ -421,30 +421,63 @@ class MambaLayer(nn.Module):
         super().__init__()
         self.dim = dim
         self.norm = nn.LayerNorm(dim)
-        self.mamba = Mamba(
+        self.mamba1 = Mamba(
             d_model=dim,
             d_state=d_state,
             d_conv=d_conv,
             expand=expand,
         )
-    
+        self.mamba2 = Mamba(
+            d_model=dim,
+            d_state=d_state,
+            d_conv=d_conv,
+            expand=expand,
+        )
+        
+        self.conv1d = nn.Conv2d(in_channels=512, out_channels=256, kernel_size=1)
+        self.spiral_eye = torch.tensor(np.load("../I2I-Mamba/models/spiral_eye.npy"), dtype=torch.float)
+        self.despiral_eye = torch.tensor(np.load("../I2I-Mamba/models//despiral_eye.npy"), dtype=torch.float)
+        self.despiral_r_eye = torch.tensor(np.load("../I2I-Mamba/models/despiral_r_eye.npy"), dtype=torch.float)
+
     def forward(self, x):
+
+        device = next(self.parameters()).device
         B, C, H, W = x.shape
 
         # Check model dimension
         assert C == self.dim
-        
-        # Convert input from (B, C, H, W) to (B, H*W, C)
-        x = x.float().view(B, C, -1).permute(0, 2, 1)
-        
-        # Normalize and pass through Mamba layer
-        norm_out = self.norm(x)
-        mamba_out = self.mamba(norm_out)
 
-        # Convert output from (B, H*W, C) to (B, C, H, W)
-        out = mamba_out.permute(0, 2, 1).view(B, C, H, W)
+        x1 = x.view(B, C, -1)
+        device = next(self.parameters()).device
+        x1 = x1.to(device)
+        self.spiral_eye = self.spiral_eye.to(device)
+        x1 = torch.einsum('ij,klj->kli',self.spiral_eye,x1).permute(0, 2, 1)
+        x2 = torch.flip(x1, dims=[1])
 
-        return out
+
+
+        # Pass three scans through mamba
+        norm_out1 = self.norm(x1)
+        mamba_out1 = self.mamba1(norm_out1)
+        norm_out2 = self.norm(x2)
+        mamba_out2 = self.mamba2(norm_out2)
+
+        self.despiral_eye = self.despiral_eye.to(device)
+        self.despiral_r_eye = self.despiral_r_eye.to(device)
+        out1 = torch.einsum('ij,klj->kli',self.despiral_eye,mamba_out1.permute(0, 2, 1)).view(B, C, H, W)
+        out2 = torch.einsum('ij,klj->kli',self.despiral_r_eye,mamba_out2.permute(0, 2, 1)).view(B, C, H, W)
+
+
+        out1 = out1.to(device)
+        out2 = out2.to(device)
+
+        concatenated = torch.cat((out1, out2), dim=1)
+        output = self.conv1d(concatenated) 
+        mamba_out = output.view(1, 256, 64, 64)
+        
+
+        return mamba_out
+
 
 
 class cmMambaWithCNN(nn.Module):
@@ -476,7 +509,7 @@ class cmMambaWithCNN(nn.Module):
     ):
         super().__init__()
         # Mamba block
-        self.mamba_layer = MambaLayer(
+        self.mamba_layer = MambaLayerOnlyspiral(
             dim=in_channels, d_state=d_state, d_conv=d_conv, expand=expand
         )
 
