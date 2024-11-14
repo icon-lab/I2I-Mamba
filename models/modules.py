@@ -436,7 +436,7 @@ class MambaLayerOnlyspiral(nn.Module):
         
         self.conv1d = nn.Conv2d(in_channels=512, out_channels=256, kernel_size=1)
         self.spiral_eye = torch.tensor(np.load("../I2I-Mamba/models/spiral_eye.npy"), dtype=torch.float)
-        self.despiral_eye = torch.tensor(np.load("../I2I-Mamba/models//despiral_eye.npy"), dtype=torch.float)
+        self.despiral_eye = torch.tensor(np.load("../I2I-Mamba/models/despiral_eye.npy"), dtype=torch.float)
         self.despiral_r_eye = torch.tensor(np.load("../I2I-Mamba/models/despiral_r_eye.npy"), dtype=torch.float)
 
     def forward(self, x):
