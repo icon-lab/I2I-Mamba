@@ -80,7 +80,7 @@ Note that for many-to-one tasks, source modalities should be in the Red and Gree
 Step 0
 Before training your data you are required to run path_generate.py to generate 'spiral_eye.npy', 'spiral_r_eye_.npy', 'despiral_r_eye_.npy' which are required for training and testing. Note that this file will be run only for the first time.
 ```
-python3 modules/path_generate.py
+python3 models/path_generate.py
 ```
 ### Commands
 
