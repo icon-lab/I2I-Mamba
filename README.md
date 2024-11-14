@@ -77,7 +77,7 @@ x.png is a single image containing both source and target image side-by-side. Th
 Note that for many-to-one tasks, source modalities should be in the Red and Green channels.
 
 ## Training
-Step 0
+### Step 0
 Before training your data you are required to run path_generate.py to generate 'spiral_eye.npy', 'spiral_r_eye_.npy', 'despiral_r_eye_.npy' which are required for training and testing. Note that this file will be run only for the first time.
 ```
 python3 models/path_generate.py
