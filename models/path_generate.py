@@ -42,12 +42,12 @@ matrix = np.zeros((64*64, 64*64), dtype=int)
 matrix[column_vector, spiral_indices] = 1
 
 np.save('spiral_eye.npy', matrix)
+np.save('despiral_eye.npy', np.transpose(matrix))
 
 spiral_indices_r = spiral_indices.flip(0)
 matrix = np.zeros((64*64, 64*64), dtype=int)
 
 matrix[column_vector, spiral_indices_r] = 1
 
-np.save('spiral_r_eye_.npy', matrix)
-np.save('despiral_r_eye_.npy', np.transpose(matrix))
+np.save('despiral_r_eye.npy', np.transpose(matrix))
 
