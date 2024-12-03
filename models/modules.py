@@ -473,7 +473,7 @@ class MambaLayerOnlyspiral(nn.Module):
 
         concatenated = torch.cat((out1, out2), dim=1)
         output = self.conv1d(concatenated) 
-        mamba_out = output.view(1, 256, 64, 64)
+        mamba_out = output.view(-1, 256, 64, 64)
         
 
         return mamba_out
