@@ -78,13 +78,13 @@ x.png is a single image containing both source and target image side-by-side. Th
 Note that for many-to-one tasks, source modalities should be in the Red and Green channels.
 
 You may use data_preparetion. 
-For one to one task, change first image path, second image path and output path, then run dataprep_one_to_one.py, which is under data_prep folder. The same slice should have same namings in their corresponding folders. If you want to prepare A__B the first image path will be path for A and second image path will be path for B.
+For one to one task, change first image path, second image path and output path, then run dataprep_one_to_one.py, which is under data_preparation folder. The same slice should have same namings in their corresponding folders. If you want to prepare A__B the first image path will be path for A and second image path will be path for B.
 
 ```
 python3 dataprep_one_to_one.py
 ```
 
-For many to one task, change first image path, second image path, third image path and output path, then run dataprep_many_to_one.py, which is under data_prep folder. The same slice should have same namings in their corresponding folders. If you want to prepare A_B__C the first image path will be path for A and second image path will be path for B and the third image path will be C.  
+For many to one task, change first image path, second image path, third image path and output path, then run dataprep_many_to_one.py, which is under data_preparation folder. The same slice should have same namings in their corresponding folders. If you want to prepare A_B__C the first image path will be path for A and second image path will be path for B and the third image path will be C.  
 
 ```
 python3 dataprep_many_to_one.py
