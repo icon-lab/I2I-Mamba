@@ -48,6 +48,30 @@ def np2th(weights, conv=False):
     return torch.from_numpy(weights)
 
 
+def fourier_transform(x, shift=True):
+
+    # Compute the 2D FFT along the last two dimensions (H, W)
+    x_fft = torch.fft.fft2(x, dim=(-2, -1))
+    
+    if shift:
+        # Shift the zero-frequency component to the center
+        x_fft = torch.fft.fftshift(x_fft, dim=(-2, -1))
+    
+    return x_fft
+
+
+def inverse_fourier_transform(x_fft, shift=True):
+    
+    if shift:
+        # Unshift the Fourier transform to its original arrangement
+        x_fft = torch.fft.ifftshift(x_fft, dim=(-2, -1))
+    
+    # Compute the inverse 2D FFT along the last two dimensions
+    x_reconstructed = torch.fft.ifft2(x_fft, dim=(-2, -1))
+    
+    return x_reconstructed.real
+
+
 class Attention(nn.Module):
     def __init__(self, config, vis):
         super(Attention, self).__init__()
@@ -407,7 +431,7 @@ class ChannelCompression(nn.Module):
         return out
     
 
-class MambaLayerOnlyspiral(nn.Module):
+class MambaLayerFourier(nn.Module):
     """ Mamba layer for state-space sequence modeling
 
     Args:
@@ -419,25 +443,27 @@ class MambaLayerOnlyspiral(nn.Module):
     """
     def __init__(self, dim, d_state=16, d_conv=4, expand=2):
         super().__init__()
+        dim = 256
         self.dim = dim
-        self.norm = nn.LayerNorm(dim)
+        self.norm1 = nn.LayerNorm(dim)
+        self.norm2 = nn.LayerNorm(512)
         self.mamba1 = Mamba(
-            d_model=dim,
+            d_model=256,
             d_state=d_state,
             d_conv=d_conv,
             expand=expand,
         )
         self.mamba2 = Mamba(
-            d_model=dim,
+            d_model=512,
             d_state=d_state,
             d_conv=d_conv,
             expand=expand,
         )
         
         self.conv1d = nn.Conv2d(in_channels=512, out_channels=256, kernel_size=1)
-        self.spiral_eye = torch.tensor(np.load("spiral_eye.npy"), dtype=torch.float)
-        self.despiral_eye = torch.tensor(np.load("despiral_eye.npy"), dtype=torch.float)
-        self.despiral_r_eye = torch.tensor(np.load("despiral_r_eye.npy"), dtype=torch.float)
+        self.spiral_eye = torch.tensor(np.load("/auto/k2/ademirtas/codes/oatli/I2I-Mamba_encdec/models/spiral_eye.npy"), dtype=torch.float)
+        self.despiral_eye = torch.tensor(np.load("/auto/k2/ademirtas/codes/oatli/I2I-Mamba_encdec/models/despiral_eye.npy"), dtype=torch.float)
+        self.despiral_r_eye = torch.tensor(np.load("/auto/k2/ademirtas/codes/oatli/I2I-Mamba_encdec/models/despiral_r_eye.npy"), dtype=torch.float)
 
     def forward(self, x):
 
@@ -445,28 +471,37 @@ class MambaLayerOnlyspiral(nn.Module):
         B, C, H, W = x.shape
 
         # Check model dimension
-        assert C == self.dim
+        #assert C == self.dim
+        
+        x_fft = fourier_transform(x, shift=True)
+        x_fft_real = x_fft.real
+        x_fft_imag = x_fft.imag
+        device = next(self.parameters()).device
+        x_fft_real = x_fft_real.to(device)
+        x_fft_imag = x_fft_imag.to(device)
+        self.spiral_eye = self.spiral_eye.to(device)
+        x_fft_imag = torch.einsum('ij,klj->kli',self.spiral_eye,x_fft_imag.view(B, C, -1)).permute(0, 2, 1)
+        x_fft_real = torch.einsum('ij,klj->kli',self.spiral_eye,x_fft_real.view(B, C, -1)).permute(0, 2, 1)
+        x2 = torch.cat([x_fft_real, x_fft_imag], dim=2)
 
         x1 = x.view(B, C, -1)
-        device = next(self.parameters()).device
         x1 = x1.to(device)
-        self.spiral_eye = self.spiral_eye.to(device)
         x1 = torch.einsum('ij,klj->kli',self.spiral_eye,x1).permute(0, 2, 1)
-        x2 = torch.flip(x1, dims=[1])
-
 
 
         # Pass three scans through mamba
-        norm_out1 = self.norm(x1)
+        norm_out1 = self.norm1(x1)
         mamba_out1 = self.mamba1(norm_out1)
-        norm_out2 = self.norm(x2)
+        norm_out2 = self.norm2(x2)
         mamba_out2 = self.mamba2(norm_out2)
+        processed_real, processed_imag = torch.chunk(mamba_out2, 2, dim=2)
 
         self.despiral_eye = self.despiral_eye.to(device)
-        self.despiral_r_eye = self.despiral_r_eye.to(device)
         out1 = torch.einsum('ij,klj->kli',self.despiral_eye,mamba_out1.permute(0, 2, 1)).view(B, C, H, W)
-        out2 = torch.einsum('ij,klj->kli',self.despiral_r_eye,mamba_out2.permute(0, 2, 1)).view(B, C, H, W)
-
+        out2 = torch.einsum('ij,klj->kli',self.despiral_eye,processed_real.permute(0, 2, 1)).view(B, C, H, W)
+        out3 = torch.einsum('ij,klj->kli',self.despiral_eye,processed_imag.permute(0, 2, 1)).view(B, C, H, W)
+        processed_fft = torch.complex(out2, out3)
+        out2 = inverse_fourier_transform(processed_fft, shift=True)
 
         out1 = out1.to(device)
         out2 = out2.to(device)
@@ -479,23 +514,7 @@ class MambaLayerOnlyspiral(nn.Module):
         return mamba_out
 
 
-
-class cmMambaWithCNN(nn.Module):
-    """ Channel-mixed Mamba (cmMamba) block with residual CNN block
-
-    Args:
-        config (dict): Model configuration.
-        in_channels (int): Number of input channels.
-        d_state (int): SSM state expansion factor.
-        d_conv (int): Local convolution width.
-        expand (int): Block expansion factor.
-        ngf (int): Number of generator filters.
-        norm_layer (nn.Module): Normalization layer.
-        use_dropout (bool): Use dropout.
-        use_bias (bool): Use bias.
-        img_size (int): Image size.
-    
-    """
+class cmMambaWithCNN_Fourier(nn.Module):
     def __init__(
         self,
         config,
@@ -509,7 +528,7 @@ class cmMambaWithCNN(nn.Module):
     ):
         super().__init__()
         # Mamba block
-        self.mamba_layer = MambaLayerOnlyspiral(
+        self.mamba_layer = MambaLayerFourier(
             dim=in_channels, d_state=d_state, d_conv=d_conv, expand=expand
         )
 
@@ -615,21 +634,21 @@ class I2IMamba(nn.Module):
 
         # Episodic bottleneck
         # cmMamba block with residual CNN block
-        self.bottleneck_1 = cmMambaWithCNN(self.config, img_size)
+        self.bottleneck_1 = cmMambaWithCNN_Fourier(self.config, img_size)
 
         self.bottleneck_2 = BottleneckCNN(self.config)
         self.bottleneck_3 = BottleneckCNN(self.config)
         self.bottleneck_4 = BottleneckCNN(self.config)
 
         # cmMamba block with residual CNN block
-        self.bottleneck_5 = cmMambaWithCNN(self.config, img_size)
+        self.bottleneck_5 = cmMambaWithCNN_Fourier(self.config, img_size)
 
         self.bottleneck_6 = BottleneckCNN(self.config)
         self.bottleneck_7 = BottleneckCNN(self.config)
         self.bottleneck_8 = BottleneckCNN(self.config)
 
-        # cmMamba block with residual CNN block
-        self.bottleneck_9 = cmMambaWithCNN(self.config, img_size)
+	    # cmMamba block with residual CNN block
+        self.bottleneck_9 = cmMambaWithCNN_Fourier(self.config, img_size)
 
         # Layer13-Decoder1
         n_downsampling = 2
@@ -638,7 +657,7 @@ class I2IMamba(nn.Module):
         model = []
         model = [
             nn.ConvTranspose2d(
-                2 * ngf * mult,
+                2*ngf * mult,
                 int(ngf * mult / 2),
                 kernel_size=3,
                 stride=2,
@@ -658,7 +677,7 @@ class I2IMamba(nn.Module):
         model = []
         model = [
             nn.ConvTranspose2d(
-                2 * ngf * mult,
+                2*ngf * mult,
                 int(ngf * mult / 2),
                 kernel_size=3,
                 stride=2,
@@ -675,7 +694,7 @@ class I2IMamba(nn.Module):
         # Layer15-Decoder3
         model = []
         model = [nn.ReflectionPad2d(3)]
-        model += [nn.Conv2d(2 * ngf, output_dim, kernel_size=7, padding=0)]
+        model += [nn.Conv2d(2*ngf, output_dim, kernel_size=7, padding=0)]
         model += [nn.Tanh()]
 
         setattr(self, "decoder_3", nn.Sequential(*model))
