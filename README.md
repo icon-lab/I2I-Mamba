@@ -8,7 +8,7 @@
   <a href="https://github.com/OmerFarukAtli" target="_blank">Omer F.&nbsp;Atli</a><sup>1,2</sup> &ensp; <b>&middot;</b> &ensp;
   <a href="https://bilalkabas.github.io/" target="_blank">Bilal&nbsp;Kabas</a><sup>1,2</sup> &ensp; <b>&middot;</b> &ensp;
   <a href="https://github.com/fuat-arslan" target="_blank">Fuat&nbsp;Arslan</a><sup>1,2</sup> &ensp; <b>&middot;</b> &ensp;
-  <a target="_blank">Arda C.&nbsp;Demirtas</a><sup>1,2</sup> &ensp; <b>&middot;</b> &ensp;
+  <a href="https://github.com/ardacinardemirtas" target="_blank">Arda C.&nbsp;Demirtas</a><sup>1,2</sup> &ensp; <b>&middot;</b> &ensp;
   <a href="https://scholar.google.com.tr/citations?user=oAXHlRMAAAAJ&hl=en" target="_blank">Mahmut&nbsp;Yurt</a><sup>3</sup> &ensp; <b>&middot;</b> &ensp;
   <a href="https://onatdalmaz.com/" target="_blank">Onat&nbsp;Dalmaz</a><sup>3</sup> &ensp; <b>&middot;</b> &ensp;
   <a href="https://kilyos.ee.bilkent.edu.tr/~cukur/" target="_blank">Tolga&nbsp;Çukur</a><sup>1,2</sup> &ensp;
